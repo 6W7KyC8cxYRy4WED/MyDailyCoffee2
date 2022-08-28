@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.ExternalConnectors;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using MyDailyCoffee2.Data;
-
-
+using MyDailyCoffee2.Model;
 
 namespace MyDailyCoffee2
 {
@@ -38,6 +39,15 @@ namespace MyDailyCoffee2
             builder.Services.AddServerSideBlazor()
                 .AddMicrosoftIdentityConsentHandler();
             builder.Services.AddSingleton<WeatherForecastService>();
+
+            //Define la base de datos a utilizar dependiendo de la configuración de compilación.
+            #if DEBUG
+            builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
+            #elif TEST
+
+            #else
+
+            #endif
 
             var app = builder.Build();
 

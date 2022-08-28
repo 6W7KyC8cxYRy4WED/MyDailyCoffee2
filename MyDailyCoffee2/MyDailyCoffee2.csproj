@@ -7,6 +7,7 @@
     <UserSecretsId>aspnet-MyDailyCoffee2-A93B15D2-6FC8-48CE-A514-6DFDDED3508D</UserSecretsId>
     <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Configurations>Debug;Release;Test</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
