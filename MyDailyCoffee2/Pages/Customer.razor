@@ -1,0 +1,83 @@
+﻿@page "/customer"
+@page "/customer/{id:int}"
+@using Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<DatabaseContext> DbFactory
+
+<h3>CustomerPage</h3>
+
+<div class="row px-3">
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Nombre</h4>
+            <RadzenTextBox @bind-Value=name Class="w-100" />
+        </RadzenCard>
+    </div>
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Apellido</h4>
+            <RadzenTextBox Class="w-100" />
+        </RadzenCard>
+    </div>
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Nombre</h4>
+            <RadzenTextBox Class="w-100" />
+        </RadzenCard>
+    </div>
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Nombre</h4>
+            <RadzenTextBox Class="w-100" />
+        </RadzenCard>
+    </div>
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Nombre</h4>
+            <RadzenTextBox Class="w-100" />
+        </RadzenCard>
+    </div>
+    <div class="col-md-6 col-lg-4 p-3">
+        <RadzenCard>
+            <h4 class="mb-4">Nombre</h4>
+            <RadzenButton Click=@(args => Save()) Class="w-100" />
+        </RadzenCard>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Model.Customer? customer;
+
+    string? name;
+
+    protected override void OnInitialized()
+    {
+            {
+        if(Id != null)
+        {
+            DatabaseContext databaseContext = DbFactory.CreateDbContext();
+            customer = databaseContext.Customers.Find(Id);
+        }
+
+        else
+        {
+            customer = new Model.Customer();
+        }
+    }
+    }
+
+
+    private void Save(){
+
+        if(customer != null)
+        {
+            DatabaseContext databaseContext = DbFactory.CreateDbContext();
+            databaseContext.Add(customer);
+            databaseContext.SaveChanges();
+        }
+    }
+}

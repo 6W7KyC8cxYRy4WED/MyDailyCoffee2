@@ -45,7 +45,7 @@ namespace MyDailyCoffee2
 
             //Define la base de datos a utilizar dependiendo de la configuración de compilación.
             #if DEBUG
-            builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
+            builder.Services.AddDbContextFactory<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
             #elif TEST
 
             #else
