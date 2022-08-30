@@ -10,6 +10,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using MyDailyCoffee2.Data;
 using MyDailyCoffee2.Model;
+using Radzen;
 
 namespace MyDailyCoffee2
 {
@@ -19,6 +20,8 @@ namespace MyDailyCoffee2
         {
             var builder = WebApplication.CreateBuilder(args);
             var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ?? builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
+
+            builder.Services.AddScoped<ContextMenuService>();
 
             // Add services to the container.
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
