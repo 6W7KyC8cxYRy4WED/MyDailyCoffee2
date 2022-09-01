@@ -1,83 +1,264 @@
-﻿@page "/customer"
+﻿@page "/customer/new"
 @page "/customer/{id:int}"
+@page "/customer/{id:int}/edit"
 @using Model
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<DatabaseContext> DbFactory
+@inject NavigationManager NavigationManager
 
-<h3>CustomerPage</h3>
+<h2>Cliente</h2>
 
-<div class="row px-3">
+    
+<RadzenTemplateForm TItem="Model.Customer" Data="customer" Submit=@OnSubmit InvalidSubmit=@OnInvalidSubmit>
+    <div class="row px-3">
+    <RadzenButton Icon="edit" Click="EditCustomer" Text="Editar" Visible=!editing />
+     <RadzenButton ButtonType="ButtonType.Submit" Text="Submit"></RadzenButton>
+    <RadzenButton Icon="cancel" Click="CancelEditCustomer" Text="Cancelar" ButtonStyle="ButtonStyle.Warning" Visible=editing/>
+    <RadzenButton Icon="delete" Text="Eliminar" ButtonStyle="ButtonStyle.Danger" Visible=editing&&!isNewItem/>
     <div class="col-md-6 col-lg-4 p-3">
         <RadzenCard>
-            <h4 class="mb-4">Nombre</h4>
-            <RadzenTextBox @bind-Value=name Class="w-100" />
+            <h5 class="mb-4">Nombre(s)</h5>
+            <RadzenTextBox @bind-Value=names Class="w-100" ReadOnly=!editing/>
         </RadzenCard>
     </div>
     <div class="col-md-6 col-lg-4 p-3">
         <RadzenCard>
-            <h4 class="mb-4">Apellido</h4>
-            <RadzenTextBox Class="w-100" />
+            <h5 class="mb-4">Apellido(s)</h5>
+            <RadzenTextBox @bind-Value=lastNames Class="w-100" ReadOnly=!editing />
         </RadzenCard>
     </div>
     <div class="col-md-6 col-lg-4 p-3">
         <RadzenCard>
-            <h4 class="mb-4">Nombre</h4>
-            <RadzenTextBox Class="w-100" />
+            <h5 class="mb-4">Correo electrónico</h5>
+            <RadzenTextBox Name="Email" @bind-Value=email Class="w-100" ReadOnly=!editing/>
+            <RadzenEmailValidator Component="Email" Text="Ingrese un Email válido." Popup=true Style="position: absolute" />
+             <RadzenRequiredValidator Component="Email" Text="Email is required" Popup=true Style="position: absolute" />
         </RadzenCard>
     </div>
     <div class="col-md-6 col-lg-4 p-3">
         <RadzenCard>
-            <h4 class="mb-4">Nombre</h4>
-            <RadzenTextBox Class="w-100" />
-        </RadzenCard>
-    </div>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <h4 class="mb-4">Nombre</h4>
-            <RadzenTextBox Class="w-100" />
-        </RadzenCard>
-    </div>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <h4 class="mb-4">Nombre</h4>
-            <RadzenButton Click=@(args => Save()) Class="w-100" />
+            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Agregar Teléfono" Click="@InsertRowCustomerPhoneNumber" Disabled=@(customerPhoneNumberToInsert != null) Visible=editing/>
+            <RadzenDataGrid @ref="customerPhoneNumbersGrid" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="customerPhoneNumbers" TItem="CustomerPhoneNumber">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Property="PhoneNumber" Title="Teléfonos" Width="280px">
+                        <EditTemplate Context="customerPhoneNumber">
+                            <RadzenTextBox @bind-Value="customerPhoneNumber.PhoneNumber" Name="PhoneNumber" Style="width:100%; display: block;" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px" Visible=editing>
+                        <Template Context="customerPhoneNumber">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
+                        </Template>
+                        <EditTemplate Context="customerPhoneNumber">
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Class="m-1" Click="@((args) => SaveRowCustomerPhoneNumber(customerPhoneNumber))" />
+                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@((args) => CancelEditRowCustomerPhoneNumber(customerPhoneNumber))" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px" Visible=editing>
+                        <Template Context="customerPhoneNumber">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
+                        </Template>
+                        <EditTemplate Context="customerPhoneNumber">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
         </RadzenCard>
     </div>
 </div>
+</RadzenTemplateForm>
+
 
 @code {
 
     [Parameter]
     public int? Id { get; set; }
 
+    private RadzenDataGrid<CustomerPhoneNumber>? customerPhoneNumbersGrid;
+
+    private List<CustomerPhoneNumber>? newCustomerPhoneNumbers;
+
+    private List<CustomerPhoneNumber>? customerPhoneNumbers;
+
+    private List<CustomerPhoneNumber>? deletedCustomerPhoneNumbers;
+
+    private CustomerPhoneNumber? customerPhoneNumberToInsert;
+
     private Model.Customer? customer;
 
-    string? name;
+    private DatabaseContext? databaseContext;
+
+    private string? names;
+
+    private string? lastNames;
+
+    private string? email;
+
+    private bool editing = false;
+
+    private bool isNewItem = false;
 
     protected override void OnInitialized()
     {
-            {
-        if(Id != null)
+        databaseContext = DbFactory.CreateDbContext();
+        deletedCustomerPhoneNumbers = new List<CustomerPhoneNumber>();
+        newCustomerPhoneNumbers = new List<CustomerPhoneNumber>();
+
+        if (NavigationManager.Uri.Contains("new"))
         {
-            DatabaseContext databaseContext = DbFactory.CreateDbContext();
-            customer = databaseContext.Customers.Find(Id);
+            isNewItem = true;
+            editing = true;
+        }
+
+        else if (NavigationManager.Uri.Contains("edit"))
+        {
+            editing = true;
+        }
+
+        if (Id != null)
+        {
+            customer = databaseContext.Customers.Include(c => c.CustomerPhoneNumbers).FirstOrDefault(c => c.Id == Id);
+
+            if (customer != null && customer.CustomerPhoneNumbers != null)
+            {
+                names = customer.Names;
+                lastNames = customer.Lastnames;
+                email = customer.Email;
+                customerPhoneNumbers = customer.CustomerPhoneNumbers;
+            }
+
+            else
+            {
+                //Retornar 404.
+            }
         }
 
         else
         {
+            editing = true;
             customer = new Model.Customer();
+            customerPhoneNumbers = new List<CustomerPhoneNumber>();
         }
     }
-    }
 
-
-    private void Save(){
-
+    private void EditCustomer()
+    {
         if(customer != null)
         {
-            DatabaseContext databaseContext = DbFactory.CreateDbContext();
-            databaseContext.Add(customer);
-            databaseContext.SaveChanges();
+            NavigationManager.NavigateTo("/customer/" + customer.Id + "/edit", true);
         }
+    }
+
+    private void CancelEditCustomer()
+    {
+        if(customer != null && !isNewItem)
+        {
+            NavigationManager.NavigateTo("/customer/" + customer.Id, true);
+        }
+
+        else
+        {
+            NavigationManager.NavigateTo("/customers/", true);
+        }
+    }
+
+    private void SaveCustomer()
+    {
+        if (customer != null && customer.CustomerPhoneNumbers != null && databaseContext != null)
+        {
+            customer.Names = names;
+            customer.Lastnames = lastNames;
+            customer.Email = email;
+            customer.CustomerPhoneNumbers.AddRange(newCustomerPhoneNumbers);
+            databaseContext.RemoveRange(deletedCustomerPhoneNumbers);
+
+            if (isNewItem)
+            {
+                databaseContext.Add(customer);
+            }
+
+            else
+            {
+                databaseContext.Update(customer);
+            }
+
+            databaseContext.SaveChanges();
+            NavigationManager.NavigateTo("/customer/" + customer.Id, true);
+        }
+    }
+
+    private async Task DeleteRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
+    {
+        if(customerPhoneNumber == customerPhoneNumberToInsert)
+        {
+            customerPhoneNumberToInsert = null;
+        }
+
+        if (customerPhoneNumbers.Contains(customerPhoneNumber))
+        {
+            customerPhoneNumbers.Remove(customerPhoneNumber);
+            deletedCustomerPhoneNumbers.Add(customerPhoneNumber);
+            await customerPhoneNumbersGrid.Reload();
+        }
+
+        if (newCustomerPhoneNumbers.Contains(customerPhoneNumber))
+        {
+            newCustomerPhoneNumbers.Remove(customerPhoneNumber);
+            await customerPhoneNumbersGrid.Reload();
+        }
+
+        customerPhoneNumbersGrid.CancelEditRow(customerPhoneNumber);
+    }
+
+    private async Task EditRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
+    {
+        if (customerPhoneNumber == customerPhoneNumberToInsert)
+        {
+            customerPhoneNumberToInsert = null;
+        }
+
+        await customerPhoneNumbersGrid.EditRow(customerPhoneNumber);
+    }
+
+    private void CancelEditRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
+    {
+        if (customerPhoneNumber == customerPhoneNumberToInsert)
+        {
+            customerPhoneNumberToInsert = null;
+        }
+
+        customerPhoneNumbersGrid.CancelEditRow(customerPhoneNumber);
+    }
+
+    private async Task SaveRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
+    {
+        if(customerPhoneNumber == customerPhoneNumberToInsert)
+        {
+            customerPhoneNumberToInsert = null;
+        }
+
+        if (!customerPhoneNumbers.Contains(customerPhoneNumber))
+        {
+            newCustomerPhoneNumbers.Add(customerPhoneNumber);
+        }
+
+        await customerPhoneNumbersGrid.UpdateRow(customerPhoneNumber);
+    }
+
+    private async Task InsertRowCustomerPhoneNumber()
+    {
+        customerPhoneNumberToInsert = new CustomerPhoneNumber();
+        await customerPhoneNumbersGrid.InsertRow(customerPhoneNumberToInsert);
+    }
+
+    void OnSubmit()
+    {
+        SaveCustomer();
+    }
+
+    void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+    {
+        
     }
 }

@@ -5,8 +5,13 @@
     src: url("inter/inter.ttf");
 }
 
+@font-face {
+    font-family: "SourceSansPro";
+    src: url("sourcesanspro/SourceSansPro-Regular.otf");
+}
+
 html, body {
-    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-family: SourceSansPro, Helvetica, Arial, sans-serif;
 }
 
 h1:focus {
