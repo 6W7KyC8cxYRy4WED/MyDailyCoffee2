@@ -6,69 +6,89 @@
 @inject IDbContextFactory<DatabaseContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<h2>Cliente</h2>
-
-    
 <RadzenTemplateForm TItem="Model.Customer" Data="customer" Submit=@OnSubmit InvalidSubmit=@OnInvalidSubmit>
     <div class="row px-3">
-    <RadzenButton Icon="edit" Click="EditCustomer" Text="Editar" Visible=!editing />
-     <RadzenButton ButtonType="ButtonType.Submit" Text="Submit"></RadzenButton>
-    <RadzenButton Icon="cancel" Click="CancelEditCustomer" Text="Cancelar" ButtonStyle="ButtonStyle.Warning" Visible=editing/>
-    <RadzenButton Icon="delete" Text="Eliminar" ButtonStyle="ButtonStyle.Danger" Visible=editing&&!isNewItem/>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <h5 class="mb-4">Nombre(s)</h5>
-            <RadzenTextBox @bind-Value=names Class="w-100" ReadOnly=!editing/>
-        </RadzenCard>
+        <div class="col-md-6 col-lg-12 p-3">
+                <RadzenCard>
+                    <h2>Cliente @names @lastNames</h2>
+                </RadzenCard>
+            </div>
+        <div class="col-md-6 col-lg-12 p-3">
+            <RadzenCard>
+                <div>
+                    <span>
+                        <RadzenButton Icon="edit" Click="EditCustomer" Text="Editar" Visible=!editing />
+                    </span>
+                    <span>
+                        <RadzenButton Icon="save" ButtonType="ButtonType.Submit" Text="Guardar" Visible=editing />
+                    </span>
+                    <span>
+                        <RadzenButton Icon="cancel" Click="CancelEditCustomer" Text="Cancelar" ButtonStyle="ButtonStyle.Warning" Visible=editing />
+                    </span>
+                    <span>
+                        <RadzenButton Icon="delete" Text="Eliminar" ButtonStyle="ButtonStyle.Danger" Visible=editing&&!isNewItem />
+                    </span>
+                </div>
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 col-lg-4 p-3">
+            <RadzenCard>
+                <h5 class="mb-4">Nombre(s)</h5>
+                <RadzenTextBox @bind-Value=names Class="w-100" ReadOnly=!editing />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 col-lg-4 p-3">
+            <RadzenCard>
+                <h5 class="mb-4">Apellido(s)</h5>
+                <RadzenTextBox @bind-Value=lastNames Class="w-100" ReadOnly=!editing />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 col-lg-4 p-3">
+            <RadzenCard>
+                <h5 class="mb-4">Correo electrónico</h5>
+                <RadzenTextBox Name="Email" @bind-Value=email Class="w-100" ReadOnly=!editing />
+                <RadzenEmailValidator Component="Email" Text="Ingrese un Email válido." Popup=true Style="position: absolute" />
+                <RadzenRequiredValidator Component="Email" Text="Email is required" Popup=true Style="position: absolute" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 col-lg-6 p-3">
+            <RadzenCard>
+                <div>
+                    <RadzenButton Icon="add_circle_outline" Text="Agregar teléfono" Click="@InsertRowCustomerPhoneNumber" Disabled=@(customerPhoneNumberToInsert != null) Visible=editing />
+                </div>
+                <br />
+                <div>
+                     <RadzenDataGrid @ref="customerPhoneNumbersGrid" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="customerPhoneNumbers" TItem="CustomerPhoneNumber">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="CustomerPhoneNumber" Property="PhoneNumber" Title="Teléfonos">
+                            <EditTemplate Context="customerPhoneNumber">
+                                <RadzenTextBox @bind-Value="customerPhoneNumber.PhoneNumber" Name="PhoneNumber" Style="width:100%;" />
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="80px" Visible=editing>
+                            <Template Context="customerPhoneNumber">
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => EditRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
+                            </Template>
+                            <EditTemplate Context="customerPhoneNumber">
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Class="m-1" Size="ButtonSize.Small" Click="@((args) => SaveRowCustomerPhoneNumber(customerPhoneNumber))" />
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@((args) => CancelEditRowCustomerPhoneNumber(customerPhoneNumber))" />
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="40px" Visible=editing>
+                            <Template Context="customerPhoneNumber">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Size="ButtonSize.Small" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
+                            </Template>
+                            <EditTemplate Context="customerPhoneNumber">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Size="ButtonSize.Small" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" />
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+                </div>
+            </RadzenCard>
+        </div>
     </div>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <h5 class="mb-4">Apellido(s)</h5>
-            <RadzenTextBox @bind-Value=lastNames Class="w-100" ReadOnly=!editing />
-        </RadzenCard>
-    </div>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <h5 class="mb-4">Correo electrónico</h5>
-            <RadzenTextBox Name="Email" @bind-Value=email Class="w-100" ReadOnly=!editing/>
-            <RadzenEmailValidator Component="Email" Text="Ingrese un Email válido." Popup=true Style="position: absolute" />
-             <RadzenRequiredValidator Component="Email" Text="Email is required" Popup=true Style="position: absolute" />
-        </RadzenCard>
-    </div>
-    <div class="col-md-6 col-lg-4 p-3">
-        <RadzenCard>
-            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Agregar Teléfono" Click="@InsertRowCustomerPhoneNumber" Disabled=@(customerPhoneNumberToInsert != null) Visible=editing/>
-            <RadzenDataGrid @ref="customerPhoneNumbersGrid" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="customerPhoneNumbers" TItem="CustomerPhoneNumber">
-                <Columns>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Property="PhoneNumber" Title="Teléfonos" Width="280px">
-                        <EditTemplate Context="customerPhoneNumber">
-                            <RadzenTextBox @bind-Value="customerPhoneNumber.PhoneNumber" Name="PhoneNumber" Style="width:100%; display: block;" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px" Visible=editing>
-                        <Template Context="customerPhoneNumber">
-                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
-                        </Template>
-                        <EditTemplate Context="customerPhoneNumber">
-                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Class="m-1" Click="@((args) => SaveRowCustomerPhoneNumber(customerPhoneNumber))" />
-                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@((args) => CancelEditRowCustomerPhoneNumber(customerPhoneNumber))" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px" Visible=editing>
-                        <Template Context="customerPhoneNumber">
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
-                        </Template>
-                        <EditTemplate Context="customerPhoneNumber">
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-                </Columns>
-            </RadzenDataGrid>
-        </RadzenCard>
-    </div>
-</div>
 </RadzenTemplateForm>
-
 
 @code {
 
@@ -144,7 +164,7 @@
 
     private void EditCustomer()
     {
-        if(customer != null)
+        if (customer != null)
         {
             NavigationManager.NavigateTo("/customer/" + customer.Id + "/edit", true);
         }
@@ -152,7 +172,7 @@
 
     private void CancelEditCustomer()
     {
-        if(customer != null && !isNewItem)
+        if (customer != null && !isNewItem)
         {
             NavigationManager.NavigateTo("/customer/" + customer.Id, true);
         }
@@ -190,7 +210,7 @@
 
     private async Task DeleteRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
     {
-        if(customerPhoneNumber == customerPhoneNumberToInsert)
+        if (customerPhoneNumber == customerPhoneNumberToInsert)
         {
             customerPhoneNumberToInsert = null;
         }
@@ -233,7 +253,7 @@
 
     private async Task SaveRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
     {
-        if(customerPhoneNumber == customerPhoneNumberToInsert)
+        if (customerPhoneNumber == customerPhoneNumberToInsert)
         {
             customerPhoneNumberToInsert = null;
         }
@@ -259,6 +279,6 @@
 
     void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
     {
-        
+
     }
 }
