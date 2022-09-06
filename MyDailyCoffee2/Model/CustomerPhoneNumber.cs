@@ -6,6 +6,8 @@ namespace MyDailyCoffee2.Model
     public class CustomerPhoneNumber
     {
         [Key]
+        public int? Id { get; set; }
+
         [ForeignKey("Customer")]
         public int? CustomerId { get; set; }
 

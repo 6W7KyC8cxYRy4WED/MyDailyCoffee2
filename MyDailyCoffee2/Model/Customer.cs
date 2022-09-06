@@ -22,5 +22,7 @@ namespace MyDailyCoffee2.Model
         public string? Email { get; set; }
 
         public List<CustomerPhoneNumber>? CustomerPhoneNumbers { get; set; }
+
+        public bool deleted;
     }
 }

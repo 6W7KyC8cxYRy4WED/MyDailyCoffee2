@@ -11,7 +11,7 @@ namespace MyDailyCoffee2.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CustomerPhoneNumber>().HasKey(cpn => new { cpn.CustomerId, cpn.PhoneNumber });
+            
         }
 
         public DbSet<Customer> Customers => Set<Customer>();
