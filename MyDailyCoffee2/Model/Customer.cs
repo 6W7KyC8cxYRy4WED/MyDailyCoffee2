@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MyDailyCoffee2.Shared;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyDailyCoffee2.Model
@@ -8,6 +9,8 @@ namespace MyDailyCoffee2.Model
         public Customer()
         {
             CustomerPhoneNumbers = new List<CustomerPhoneNumber>();
+            Deleted = false;
+            CreatedAt = DateTimeOffset.Now;
         }
 
         [Key]
@@ -23,6 +26,36 @@ namespace MyDailyCoffee2.Model
 
         public List<CustomerPhoneNumber>? CustomerPhoneNumbers { get; set; }
 
-        public bool deleted;
+        [Required]
+        public bool Deleted { get; set; }
+
+        [Required]
+        public DateTimeOffset CreatedAt { get; set; }
+
+        [Required]
+        public string? CreatedBy { get; set; }
+
+        [Required]
+        public DateTimeOffset UpdatedAt { get; set; }
+
+        [Required]
+        public string? UpdatedBy { get; set; }
+
+        public void Delete(AzureUser azureUser)
+        {
+            Deleted = true;
+            SetLastUpdate(azureUser);
+        }
+
+        private void SetLastUpdate(AzureUser azureUser)
+        {
+            UpdatedAt = DateTimeOffset.Now;
+            UpdatedBy = azureUser.GetUID();
+        }
+
+        public void Update(AzureUser azureUser)
+        {
+            SetLastUpdate(azureUser);
+        }
     }
 }
