@@ -18,7 +18,7 @@
     <div class="row px-3">
         <div class="col-md-6 col-lg-12 p-3">
                 <RadzenCard>
-                    <h2>Cliente @names @lastNames</h2>
+                    <h2>Cliente @customer!.Names @customer!.Lastnames</h2>
                 </RadzenCard>
             </div>
         <div class="col-md-6 col-lg-12 p-3">
@@ -42,21 +42,21 @@
         <div class="col-md-6 col-lg-4 p-3">
             <RadzenCard>
                 <h5 class="mb-4">Nombre(s)</h5>
-                <RadzenTextBox Name="Names" @bind-Value=names Class="w-100" ReadOnly=!editing Style="display: block" />
+                <RadzenTextBox Name="Names" @bind-Value=customer!.Names Class="w-100" ReadOnly=!editing Style="display: block" />
                 <RadzenRequiredValidator Component="Names" Text="Se requeire un nombre." Popup=true Style="position: relative" />
             </RadzenCard>
         </div>
         <div class="col-md-6 col-lg-4 p-3">
             <RadzenCard>
                 <h5 class="mb-4">Apellido(s)</h5>
-                <RadzenTextBox Name="LastNames" @bind-Value=lastNames Class="w-100" ReadOnly=!editing Style="display: block" />
-                <RadzenRequiredValidator Component="LastNames" Text="Se requiere un apellido." Popup=true Style="position: relative" />
+                <RadzenTextBox Name="LastNames" @bind-Value=customer!.Lastnames Class="w-100" ReadOnly=!editing Style="display: block" />
+                <RadzenRequiredValidator Component="Lastnames" Text="Se requiere un apellido." Popup=true Style="position: relative" />
             </RadzenCard>
         </div>
         <div class="col-md-6 col-lg-4 p-3">
             <RadzenCard>
                 <h5 class="mb-4">Correo electrónico</h5>
-                <RadzenTextBox Name="Email" @bind-Value=email Class="w-100" ReadOnly=!editing Style="display: block" />
+                <RadzenTextBox Name="Email" @bind-Value=customer!.Email Class="w-100" ReadOnly=!editing Style="display: block" />
                 <RadzenEmailValidator Component="Email" Text="Ingrese un email válido." Popup=true Style="position: relative" />
             </RadzenCard>
         </div>
@@ -114,12 +114,6 @@
 
     private DatabaseContext? databaseContext;
 
-    private string? names;
-
-    private string? lastNames;
-
-    private string? email;
-
     private bool editing = false;
 
     private bool isNewItem = false;
@@ -133,26 +127,17 @@
         DialogService.OnClose += CloseDialog;
         databaseContext = DbFactory.CreateDbContext();
         azureUser = new AzureUser(AuthenticationStateProvider);
-
-        if (NavigationManager.Uri.Contains("new"))
-        {
-            isNewItem = true;
-        }
-
-        else if (NavigationManager.Uri.Contains("edit"))
-        {
-            editing = true;
-        }
-
-        if (Id != null)
+    
+        if(Id != null)
         {
             customer = databaseContext.Customers.Include(c => c.CustomerPhoneNumbers).FirstOrDefault(c => c.Id == Id && !c.Deleted);
 
             if (customer != null)
             {
-                names = customer.Names;
-                lastNames = customer.Lastnames;
-                email = customer.Email;
+                if(NavigationManager.Uri.Contains("edit"))
+                {
+                    editing = true;
+                }
             }
 
             else
@@ -161,8 +146,9 @@
             }
         }
 
-        else
+        else if (NavigationManager.Uri.Contains("new"))
         {
+            isNewItem = true;
             editing = true;
             customer = new Model.Customer();
             customer.CreatedBy = azureUser.GetUID();
@@ -278,9 +264,6 @@
 
     private void OnSubmitCustomer()
     {
-        customer!.Names = names;
-        customer.Lastnames = lastNames;
-        customer.Email = email;
         customer.Update(azureUser!);
         databaseContext!.SaveChanges();
         NavigationManager.NavigateTo("/customer/" + customer.Id, true);

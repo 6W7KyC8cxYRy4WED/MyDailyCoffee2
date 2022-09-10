@@ -5,15 +5,22 @@
 @using System.Linq.Dynamic.Core
 
 @inject IDbContextFactory<DatabaseContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <h3>Customers</h3>
 
-<RadzenDataGrid Data="@customers" Count="@count" LoadData="@LoadCustomers" TItem="Model.Customer" AllowVirtualization="true" Style="height:400px"
+<RadzenDataGrid Data="@customers" Count="@count" LoadData="@LoadCustomers" TItem="Model.Customer" AllowVirtualization="true" Style="height:400px" FilterMode="FilterMode.Simple"
                 AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
                 AllowSorting="true">
     <Columns>
         <RadzenDataGridColumn TItem="Model.Customer" Property="Names" Title="Nombre(s)" />
         <RadzenDataGridColumn TItem="Model.Customer" Property="Lastnames" Title="Apellido(s)" />
+        <RadzenDataGridColumn TItem="Model.Customer" Property="Email" Title="Email" />
+        <RadzenDataGridColumn TItem="Model.Customer" Filterable="false" Sortable="false" Title="Ver">
+            <Template Context="customer">
+                <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => ViewCustomer(customer))" @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
@@ -21,7 +28,7 @@
 
     private IEnumerable<Model.Customer>? customers;
 
-    private DatabaseContext databaseContext;
+    private DatabaseContext? databaseContext;
 
     private int count;
 
@@ -32,8 +39,24 @@
 
     private void LoadCustomers(LoadDataArgs loadDataArgs)
     {
-        IQueryable<Model.Customer> query = databaseContext.Customers.Where(c => !c.Deleted).AsQueryable();
-        customers = query.Skip(loadDataArgs.Skip.Value).Take(loadDataArgs.Top.Value).ToList();
+        IQueryable<Model.Customer> query = databaseContext!.Customers.Where(c => !c.Deleted).AsQueryable();
+
+        if(!string.IsNullOrEmpty(loadDataArgs.Filter))
+        {
+            query = query.Where(loadDataArgs.Filter);
+        }
+
+        if(!string.IsNullOrEmpty(loadDataArgs.OrderBy))
+        {
+            query = query.OrderBy(loadDataArgs.OrderBy);
+        }
+
+        customers = query.Skip(loadDataArgs.Skip!.Value).Take(loadDataArgs.Top!.Value).ToList();
         count = databaseContext.Customers.Count();
+    }
+
+    private void ViewCustomer(Model.Customer customer)
+    {
+        NavigationManager.NavigateTo("/customer/" + customer!.Id, true);
     }
 }
