@@ -122,6 +122,9 @@
 
     private AzureUser? azureUser;
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
     protected override void OnInitialized()
     {
         DialogService.OnClose += CloseDialog;
@@ -264,7 +267,7 @@
 
     private void OnSubmitCustomer()
     {
-        customer.Update(azureUser!);
+        customer!.Update(azureUser!);
         databaseContext!.SaveChanges();
         NavigationManager.NavigateTo("/customer/" + customer.Id, true);
     }

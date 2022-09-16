@@ -39,6 +39,7 @@ namespace MyDailyCoffee2
             {
                 // By default, all incoming requests will be authorized according to the default policy
                 options.FallbackPolicy = options.DefaultPolicy;
+                options.AddPolicy("Customer.Edit", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireClaim("MDC2.Dev.Customer.Edit").Build());
             });
 
             builder.Services.AddRazorPages();
