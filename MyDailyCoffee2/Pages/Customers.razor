@@ -41,12 +41,12 @@
     {
         IQueryable<Model.Customer> query = databaseContext!.Customers.Where(c => !c.Deleted).AsQueryable();
 
-        if(!string.IsNullOrEmpty(loadDataArgs.Filter))
+        if (!string.IsNullOrEmpty(loadDataArgs.Filter))
         {
             query = query.Where(loadDataArgs.Filter);
         }
 
-        if(!string.IsNullOrEmpty(loadDataArgs.OrderBy))
+        if (!string.IsNullOrEmpty(loadDataArgs.OrderBy))
         {
             query = query.OrderBy(loadDataArgs.OrderBy);
         }

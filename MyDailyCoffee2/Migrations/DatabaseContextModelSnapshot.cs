@@ -17,10 +17,20 @@ namespace MyDailyCoffee2.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("MyDailyCoffee2.Model.AzureUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AzureUsers");
+                });
 
             modelBuilder.Entity("MyDailyCoffee2.Model.Customer", b =>
                 {
@@ -33,9 +43,9 @@ namespace MyDailyCoffee2.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("CreatedById")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("Deleted")
                         .HasColumnType("bit");
@@ -54,11 +64,15 @@ namespace MyDailyCoffee2.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("UpdatedBy")
+                    b.Property<string>("UpdatedById")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("UpdatedById");
 
                     b.ToTable("Customers");
                 });
@@ -82,6 +96,25 @@ namespace MyDailyCoffee2.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("CustomerPhoneNumbers");
+                });
+
+            modelBuilder.Entity("MyDailyCoffee2.Model.Customer", b =>
+                {
+                    b.HasOne("MyDailyCoffee2.Model.AzureUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyDailyCoffee2.Model.AzureUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("MyDailyCoffee2.Model.CustomerPhoneNumber", b =>

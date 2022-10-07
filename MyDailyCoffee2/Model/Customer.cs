@@ -1,5 +1,4 @@
-﻿using MyDailyCoffee2.Shared;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyDailyCoffee2.Model
@@ -32,14 +31,18 @@ namespace MyDailyCoffee2.Model
         [Required]
         public DateTimeOffset CreatedAt { get; set; }
 
-        [Required]
-        public string? CreatedBy { get; set; }
+        [ForeignKey("CreatedBy")]
+        public string CreatedById { get; set; }
+
+        public AzureUser CreatedBy { get; set; }
 
         [Required]
         public DateTimeOffset UpdatedAt { get; set; }
 
-        [Required]
-        public string? UpdatedBy { get; set; }
+        [ForeignKey("UpdatedBy")]
+        public string UpdatedById { get; set; }
+
+        public AzureUser UpdatedBy { get; set; }
 
         public void Delete(AzureUser azureUser)
         {
@@ -50,7 +53,7 @@ namespace MyDailyCoffee2.Model
         private void SetLastUpdate(AzureUser azureUser)
         {
             UpdatedAt = DateTimeOffset.Now;
-            UpdatedBy = azureUser.GetUID();
+            UpdatedById = azureUser.Id;
         }
 
         public void Update(AzureUser azureUser)

@@ -10,6 +10,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using MyDailyCoffee2.Data;
 using MyDailyCoffee2.Model;
+using MyDailyCoffee2.Shared;
 using Radzen;
 
 namespace MyDailyCoffee2
@@ -39,7 +40,7 @@ namespace MyDailyCoffee2
             {
                 // By default, all incoming requests will be authorized according to the default policy
                 options.FallbackPolicy = options.DefaultPolicy;
-                options.AddPolicy("Customer.Edit", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireClaim("MDC2.Dev.Customer.Edit").Build());
+                options.AddPolicy("Customer.Edit", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireClaim("groups", builder.Configuration["SecurityGroups:Customer.Edit"]).Build());
             });
 
             builder.Services.AddRazorPages();
@@ -47,7 +48,7 @@ namespace MyDailyCoffee2
                 .AddMicrosoftIdentityConsentHandler();
             builder.Services.AddSingleton<WeatherForecastService>();
 
-            //Define la base de datos a utilizar dependiendo de la configuración de compilación.
+            //Define la base de datos a utilizar dependiendo de la configuraciï¿½n de compilaciï¿½n.
             #if DEBUG
             builder.Services.AddDbContextFactory<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
             #elif TEST

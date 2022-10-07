@@ -14,31 +14,33 @@
 
 @implements IDisposable
 
-<RadzenTemplateForm TItem="Model.Customer" Data="customer" Submit=@OnSubmitCustomer>
+<RadzenTemplateForm Context="RadzenTemplateForm" TItem="Model.Customer" Data="customer" Submit=@OnSubmitCustomer>
     <div class="row px-3">
         <div class="col-md-6 col-lg-12 p-3">
-                <RadzenCard>
-                    <h2>Cliente @customer!.Names @customer!.Lastnames</h2>
-                </RadzenCard>
-            </div>
-        <div class="col-md-6 col-lg-12 p-3">
             <RadzenCard>
-                <div>
-                    <span>
-                        <RadzenButton Icon="edit" Click="EditCustomer" Text="Editar" Visible=!editing />
-                    </span>
-                    <span>
-                        <RadzenButton Icon="save" ButtonType="ButtonType.Submit" Text="Guardar" Visible=editing />
-                    </span>
-                    <span>
-                        <RadzenButton Icon="cancel" Click="CancelEditCustomer" Text="Cancelar" ButtonStyle="ButtonStyle.Warning" Visible=editing />
-                    </span>
-                    <span>
-                        <RadzenButton Icon="delete" Text="Eliminar" ButtonStyle="ButtonStyle.Danger" Click=@(args => DialogService.Confirm("¿Estás seguro de eliminar el cliente?", "Eliminar cliente.", new ConfirmOptions() { OkButtonText = "Si", CancelButtonText = "No" })) Visible=editing&&!isNewItem />
-                    </span>
-                </div>
+                <h2>Cliente @customer!.Names @customer!.Lastnames</h2>
             </RadzenCard>
         </div>
+        <AuthorizeView Policy="Customer.Edit">
+            <div class="col-md-6 col-lg-12 p-3">
+                <RadzenCard>
+                    <div>
+                        <span>
+                            <RadzenButton Icon="edit" Click="EditCustomer" Text="Editar" Visible=!editing />
+                        </span>
+                        <span>
+                            <RadzenButton Icon="save" ButtonType="ButtonType.Submit" Text="Guardar" Visible=editing />
+                        </span>
+                        <span>
+                            <RadzenButton Icon="cancel" Click="CancelEditCustomer" Text="Cancelar" ButtonStyle="ButtonStyle.Warning" Visible=editing />
+                        </span>
+                        <span>
+                            <RadzenButton Icon="delete" Text="Eliminar" ButtonStyle="ButtonStyle.Danger" Click=@(args => DialogService.Confirm("¿Estás seguro de eliminar el cliente?", "Eliminar cliente.", new ConfirmOptions() { OkButtonText = "Si", CancelButtonText = "No" })) Visible=editing&&!isNewItem />
+                        </span>
+                    </div>
+                </RadzenCard>
+            </div>
+        </AuthorizeView>
         <div class="col-md-6 col-lg-4 p-3">
             <RadzenCard>
                 <h5 class="mb-4">Nombre(s)</h5>
@@ -49,7 +51,7 @@
         <div class="col-md-6 col-lg-4 p-3">
             <RadzenCard>
                 <h5 class="mb-4">Apellido(s)</h5>
-                <RadzenTextBox Name="LastNames" @bind-Value=customer!.Lastnames Class="w-100" ReadOnly=!editing Style="display: block" />
+                <RadzenTextBox Name="Lastnames" @bind-Value=customer!.Lastnames Class="w-100" ReadOnly=!editing Style="display: block" />
                 <RadzenRequiredValidator Component="Lastnames" Text="Se requiere un apellido." Popup=true Style="position: relative" />
             </RadzenCard>
         </div>
@@ -78,7 +80,7 @@
                             <RadzenRegexValidator Component="PhoneNumber" Text="El teléfono no tiene un formato válido." Pattern=@Constants.PhoneNumberRegex Popup=true />
                         </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="80px" Visible=editing>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="95px" Visible=editing>
                         <Template Context="customerPhoneNumber">
                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => EditRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
                         </Template>
@@ -87,7 +89,7 @@
                             <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@((args) => CancelEditRowCustomerPhoneNumber(customerPhoneNumber))" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="40px" Visible=editing>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px" Visible=editing>
                         <Template Context="customerPhoneNumber">
                             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Size="ButtonSize.Small" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
                         </Template>
@@ -129,15 +131,15 @@
     {
         DialogService.OnClose += CloseDialog;
         databaseContext = DbFactory.CreateDbContext();
-        azureUser = new AzureUser(AuthenticationStateProvider);
-    
-        if(Id != null)
+        azureUser = AzureUserManager.Get(databaseContext, AuthenticationStateProvider);
+
+        if (Id != null)
         {
             customer = databaseContext.Customers.Include(c => c.CustomerPhoneNumbers).FirstOrDefault(c => c.Id == Id && !c.Deleted);
 
             if (customer != null)
             {
-                if(NavigationManager.Uri.Contains("edit"))
+                if (NavigationManager.Uri.Contains("edit"))
                 {
                     editing = true;
                 }
@@ -154,7 +156,7 @@
             isNewItem = true;
             editing = true;
             customer = new Model.Customer();
-            customer.CreatedBy = azureUser.GetUID();
+            customer.CreatedById = azureUser.Id;
             databaseContext!.Add(customer);
         }
     }
@@ -249,12 +251,12 @@
 
     private void OnUpdateRowCustomerPhoneNumber(CustomerPhoneNumber customerPhoneNumber)
     {
-        if(customerPhoneNumber == customerPhoneNumberToInsert)
+        if (customerPhoneNumber == customerPhoneNumberToInsert)
         {
             customerPhoneNumberToInsert = null;
         }
 
-        if(customerPhoneNumber.Customer == null)
+        if (customerPhoneNumber.Customer == null)
         {
             customer!.CustomerPhoneNumbers!.Add(customerPhoneNumber);
         }
@@ -267,6 +269,14 @@
 
     private void OnSubmitCustomer()
     {
+        foreach (CustomerPhoneNumber customerPhoneNumber in customer.CustomerPhoneNumbers)
+        {
+            if (string.IsNullOrEmpty(customerPhoneNumber.PhoneNumber))
+            {
+                databaseContext!.Remove(customerPhoneNumber);
+            }
+        }
+
         customer!.Update(azureUser!);
         databaseContext!.SaveChanges();
         NavigationManager.NavigateTo("/customer/" + customer.Id, true);
@@ -274,7 +284,7 @@
 
     private void CloseDialog(dynamic result)
     {
-        if(result != null && result is bool && result)
+        if (result != null && result is bool && result)
         {
             customer!.Delete(azureUser!);
             databaseContext!.SaveChanges();
