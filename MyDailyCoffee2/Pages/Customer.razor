@@ -80,7 +80,7 @@
                             <RadzenRegexValidator Component="PhoneNumber" Text="El teléfono no tiene un formato válido." Pattern=@Constants.PhoneNumberRegex Popup=true />
                         </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="95px" Visible=editing>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="@Constants.DualMiniButtonPx" Visible=editing>
                         <Template Context="customerPhoneNumber">
                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => EditRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
                         </Template>
@@ -89,7 +89,7 @@
                             <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@((args) => CancelEditRowCustomerPhoneNumber(customerPhoneNumber))" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px" Visible=editing>
+                    <RadzenDataGridColumn TItem="CustomerPhoneNumber" Context="customerPhoneNumber" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="@Constants.SingleMiniButtonPx" Visible=editing>
                         <Template Context="customerPhoneNumber">
                             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Class="m-1" Size="ButtonSize.Small" Click="@(args => DeleteRowCustomerPhoneNumber(customerPhoneNumber))" @onclick:stopPropagation="true" />
                         </Template>
