@@ -11,6 +11,7 @@ using Microsoft.Identity.Web.UI;
 using MyDailyCoffee2.Data;
 using MyDailyCoffee2.Model;
 using MyDailyCoffee2.Shared;
+using MyDailyCoffee2.TestData;
 using Radzen;
 
 namespace MyDailyCoffee2
@@ -28,13 +29,8 @@ namespace MyDailyCoffee2
             builder.Services.AddScoped<TooltipService>();
 
             // Add services to the container.
-            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-            .AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
-            .AddInMemoryTokenCaches();
-            builder.Services.AddControllersWithViews()
-                .AddMicrosoftIdentityUI();
+            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd")).EnableTokenAcquisitionToCallDownstreamApi(initialScopes).AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph")).AddInMemoryTokenCaches();
+            builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
 
             builder.Services.AddAuthorization(options =>
             {
@@ -44,18 +40,11 @@ namespace MyDailyCoffee2
             });
 
             builder.Services.AddRazorPages();
-            builder.Services.AddServerSideBlazor()
-                .AddMicrosoftIdentityConsentHandler();
+            builder.Services.AddServerSideBlazor().AddMicrosoftIdentityConsentHandler();
             builder.Services.AddSingleton<WeatherForecastService>();
-
-            //Define la base de datos a utilizar dependiendo de la configuraci�n de compilaci�n.
-            #if DEBUG
             builder.Services.AddDbContextFactory<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
-            #elif TEST
 
-            #else
-
-            #endif
+            //DatabasePopulator.Populate();
 
             var app = builder.Build();
 
