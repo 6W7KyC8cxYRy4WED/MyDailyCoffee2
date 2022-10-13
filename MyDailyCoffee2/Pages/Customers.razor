@@ -10,33 +10,43 @@
 @inject ProtectedLocalStorage ProtectedLocalStore
 
 <div class="container-fluid">
-    <div class="row py-1">
-        <RadzenCard>
-            <h3>Clientes</h3>
-        </RadzenCard>
+    <div class="row">
+        <div class="col-md-6 col-lg-12 py-2">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.H4">
+                    Clientes
+                </RadzenText>
+            </RadzenCard>
+        </div>
     </div>
-    <div class="row py-1">
-        <RadzenCard>
-            <span>
-                <RadzenButton Icon="edit" Click="AddNewCustomer" Text="Editar"/>
-            </span>
-        </RadzenCard>
+    <div class="row">
+        <div class="col-md-6 col-lg-12 py-2">
+            <RadzenCard>
+                <AuthorizeView Policy="Customer.Edit">
+                    <span>
+                        <RadzenButton Icon="add_circle_outline" Click="AddNewCustomer" Text="Agregar Cliente" />
+                    </span>
+                </AuthorizeView>
+            </RadzenCard>
+        </div>
     </div>
-    <div class="row py-1">
-        <RadzenCard>
-            <RadzenDataGrid @bind-Settings="@DataGridSettings" Data="@customers" Count="@count" LoadData="@LoadCustomers" TItem="Model.Customer" AllowVirtualization="true" Style="height:650px" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or" AllowSorting="true">
-                <Columns>
-                    <RadzenDataGridColumn TItem="Model.Customer" Property="Names" Title="Nombre(s)" />
-                    <RadzenDataGridColumn TItem="Model.Customer" Property="Lastnames" Title="Apellido(s)" />
-                    <RadzenDataGridColumn TItem="Model.Customer" Property="Email" Title="Email" />
-                    <RadzenDataGridColumn TItem="Model.Customer" Filterable="false" Sortable="false" Title="Ver" Width="@Constants.SingleMiniButtonPx">
-                        <Template Context="customer">
-                            <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => ViewCustomer(customer))" @onclick:stopPropagation="true" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Columns>
-            </RadzenDataGrid>
-        </RadzenCard>
+    <div class="row">
+        <div class="col-md-6 col-lg-12 py-2">
+            <RadzenCard>
+                <RadzenDataGrid @bind-Settings="@DataGridSettings" Data="@customers" Count="@count" LoadData="@LoadCustomers" TItem="Model.Customer" AllowVirtualization="true" Style="height:650px" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or" AllowSorting="true">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Model.Customer" Property="Names" Title="Nombre(s)" />
+                        <RadzenDataGridColumn TItem="Model.Customer" Property="Lastnames" Title="Apellido(s)" />
+                        <RadzenDataGridColumn TItem="Model.Customer" Property="Email" Title="Email" />
+                        <RadzenDataGridColumn TItem="Model.Customer" Filterable="false" Sortable="false" Title="Ver" Width="@Constants.SingleMiniButtonPx">
+                            <Template Context="customer">
+                                <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Light" Class="m-1" Size="ButtonSize.Small" Click="@(args => ViewCustomer(customer))" @onclick:stopPropagation="true" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenCard>
+        </div>
     </div>
 </div>
 
@@ -101,11 +111,11 @@
 
     private async Task LoadStateAsync()
     {
-        var result = await ProtectedLocalStore.GetAsync<DataGridSettings>("CustomersDataGridSettings");
+        ProtectedBrowserStorageResult<DataGridSettings> customersDataGridSettings = await ProtectedLocalStore.GetAsync<DataGridSettings>("CustomersDataGridSettings");
 
-        if (result.Success)
+        if (customersDataGridSettings.Success)
         {
-            dataGridSettings = result.Value!;
+            dataGridSettings = customersDataGridSettings.Value!;
         }
     }
 
