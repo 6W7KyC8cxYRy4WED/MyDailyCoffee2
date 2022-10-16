@@ -1,0 +1,38 @@
+﻿@page "/materials/"
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-lg-12 py-2">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.H4">
+                    Materiales
+                </RadzenText>
+            </RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-lg-12 py-2">
+            <RadzenCard>
+                <RadzenTabs RenderMode="TabRenderMode.Server">
+                    <Tabs>
+                        <RadzenTabsItem Text="Materiales">
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="Líneas">
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="Tipos">
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="Marcas">
+                            <MaterialBrands />
+                        </RadzenTabsItem>
+                    </Tabs>
+                </RadzenTabs>
+            </RadzenCard>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+
+}

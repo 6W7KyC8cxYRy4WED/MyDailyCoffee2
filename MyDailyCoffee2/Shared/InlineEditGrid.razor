@@ -1,0 +1,101 @@
+﻿@using Model
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.ChangeTracking
+
+@typeparam T where T : class
+
+@inject IDbContextFactory<DatabaseContext> DbFactory
+
+@code {
+
+    public IList<T>? dataGridList;
+
+    public RadzenDataGrid<T>? dataGrid;
+
+    public T? itemToInsert;
+
+    public DatabaseContext? databaseContext;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        databaseContext = DbFactory.CreateDbContext();
+        dataGridList = databaseContext.Set<T>().ToList();
+    }
+
+    public async Task EditRow(T item)
+    {
+        await dataGrid!.EditRow(item);
+    }
+
+    public void OnUpdateRow(T item)
+    {
+        if (item!.Equals(itemToInsert))
+        {
+            itemToInsert = default(T);
+        }
+
+        databaseContext!.Update(item);
+        databaseContext.SaveChanges();
+    }
+
+    public async Task SaveRow(T item)
+    {
+        if (item!.Equals(itemToInsert))
+        {
+            itemToInsert = default(T)!;
+        }
+
+        await dataGrid!.UpdateRow(item);
+    }
+
+    public void CancelEdit(T item)
+    {
+        if (item!.Equals(itemToInsert))
+        {
+            itemToInsert = default(T)!;
+        }
+
+        dataGrid!.CancelEditRow(item);
+        EntityEntry itemEntry = databaseContext!.Entry(item);
+
+        if (itemEntry.State == EntityState.Modified)
+        {
+            itemEntry.CurrentValues.SetValues(itemEntry.OriginalValues);
+            itemEntry.State = EntityState.Unchanged;
+        }
+    }
+
+    public async Task DeleteRow(T item)
+    {
+        if (item!.Equals(itemToInsert))
+        {
+            item = default(T)!;
+        }
+
+        if (dataGridList!.Contains(item))
+        {
+            databaseContext!.Remove(item);
+            dataGridList.Remove(item);
+            databaseContext.SaveChanges();
+            await dataGrid!.Reload();
+        }
+
+        else
+        {
+            dataGrid!.CancelEditRow(item);
+        }
+    }
+
+    public async Task InsertRow()
+    {
+        itemToInsert = (T)Activator.CreateInstance(typeof(T))!;
+        await dataGrid!.InsertRow(itemToInsert);
+    }
+
+    public void OnCreateRow(T item)
+    {
+        databaseContext!.Add(item);
+        databaseContext.SaveChanges();
+    }
+}

@@ -1,0 +1,26 @@
+﻿@using Model
+@using Microsoft.EntityFrameworkCore
+
+@inject DialogService DialogService
+@inject IDbContextFactory<DatabaseContext> DbFactory
+
+@inherits InlineEditGrid<MaterialBrand>
+
+<RadzenDataGrid @ref="dataGrid" AllowFiltering="false" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single" Data="dataGridList" TItem="MaterialBrand" RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="MaterialBrand" Property="Name" Title="Nombre">
+            <EditTemplate Context="MaterialBrand">
+                    <RadzenTextBox @bind-Value="MaterialBrand.Name" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <InlineEditGridButtonsColumn DatabaseContext="databaseContext" DataGrid="dataGrid" ItemToInsert="itemToInsert" DataGridList="dataGridList" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+}

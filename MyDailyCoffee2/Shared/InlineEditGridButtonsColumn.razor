@@ -1,0 +1,90 @@
+﻿@typeparam T
+
+@using Model
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.ChangeTracking
+
+<RadzenDataGridColumn TItem="T" Context="Item" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+    <Template Context="Item">
+        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(Item))" @onclick:stopPropagation="true">
+        </RadzenButton>
+        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(Item))" @onclick:stopPropagation="true">
+        </RadzenButton>
+    </Template>
+    <EditTemplate Context="Item">
+        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(Item))">
+        </RadzenButton>
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@((args) => CancelEdit(Item))">
+        </RadzenButton>
+        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(Item))">
+        </RadzenButton>
+    </EditTemplate>
+</RadzenDataGridColumn>
+
+@code {
+
+    [Parameter]
+    public DatabaseContext? DatabaseContext { get; set; }
+
+    [Parameter]
+    public IList<T>? DataGridList { get; set; }
+
+    [Parameter]
+    public RadzenDataGrid<T>? DataGrid { get; set; }
+
+    [Parameter]
+    public T? ItemToInsert { get; set; }
+
+    public async Task EditRow(T item)
+    {
+        await DataGrid!.EditRow(item);
+    }
+
+    public async Task DeleteRow(T item)
+    {
+        if (item!.Equals(ItemToInsert))
+        {
+            item = default(T)!;
+        }
+
+        if (DataGridList!.Contains(item))
+        {
+            DatabaseContext!.Remove(item);
+            DataGridList.Remove(item);
+            DatabaseContext.SaveChanges();
+            await DataGrid!.Reload();
+        }
+
+        else
+        {
+            DataGrid!.CancelEditRow(item);
+        }
+    }
+
+    public async Task SaveRow(T item)
+    {
+        if (item!.Equals(ItemToInsert))
+        {
+            ItemToInsert = default(T)!;
+        }
+
+        await DataGrid!.UpdateRow(item);
+    }
+
+    public void CancelEdit(T item)
+    {
+        if (item!.Equals(ItemToInsert))
+        {
+            ItemToInsert = default(T)!;
+        }
+
+        DataGrid!.CancelEditRow(item);
+        EntityEntry itemEntry = DatabaseContext!.Entry(item);
+
+        if (itemEntry.State == EntityState.Modified)
+        {
+            itemEntry.CurrentValues.SetValues(itemEntry.OriginalValues);
+            itemEntry.State = EntityState.Unchanged;
+        }
+    }
+}
