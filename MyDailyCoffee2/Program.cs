@@ -11,7 +11,6 @@ using Microsoft.Identity.Web.UI;
 using MyDailyCoffee2.Data;
 using MyDailyCoffee2.Model;
 using MyDailyCoffee2.Shared;
-using MyDailyCoffee2.TestData;
 using Radzen;
 
 namespace MyDailyCoffee2
@@ -44,7 +43,8 @@ namespace MyDailyCoffee2
             builder.Services.AddSingleton<WeatherForecastService>();
             builder.Services.AddDbContextFactory<DatabaseContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:DevelopDatabase"]));
 
-            //DatabasePopulator.Populate();
+            DatabaseContext databaseContext = new DatabaseContext();
+            databaseContext.Configure();
 
             var app = builder.Build();
 
