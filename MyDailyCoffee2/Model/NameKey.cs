@@ -9,9 +9,8 @@ namespace MyDailyCoffee2.Model
         public string LowerCaseName { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get { return name; } set { name = value; LowerCaseName = value.ToLower(); } }
 
-        [NotMapped]
-        public string DisplayName { get { return Name; } set { Name = value; LowerCaseName = value.ToLower(); } }
+        private string name;
     }
 }

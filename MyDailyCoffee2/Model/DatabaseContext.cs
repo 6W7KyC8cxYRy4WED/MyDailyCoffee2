@@ -14,6 +14,21 @@ namespace MyDailyCoffee2.Model
 
         }
 
+        public void Configure()
+        {
+            if (MaterialMeasurementTypes.Count() == 0)
+            {
+                MaterialMeasurementTypes.AddRange(MaterialMeasurementType.GetMaterialMeasurementTypes());
+            }
+
+            if (MaterialMeasurements.Count() == 0)
+            {
+                MaterialMeasurements.AddRange(MaterialMeasurement.GetMaterialMeasurements());
+            }
+
+            SaveChanges();
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -35,5 +50,19 @@ namespace MyDailyCoffee2.Model
         public DbSet<CustomerPhoneNumber> CustomerPhoneNumbers => Set<CustomerPhoneNumber>();
 
         public DbSet<AzureUser> AzureUsers => Set<AzureUser>();
+
+        public DbSet<Material> Materials => Set<Material>();
+
+        public DbSet<MaterialMeasurementType> MaterialMeasurementTypes => Set<MaterialMeasurementType>();
+
+        public DbSet<MaterialMeasurement> MaterialMeasurements => Set<MaterialMeasurement>();
+
+        public DbSet<MaterialLine> MaterialLines => Set<MaterialLine>();
+
+        public DbSet<MaterialBrand> MaterialBrands => Set<MaterialBrand>();
+
+        public DbSet<MaterialType> MaterialTypes => Set<MaterialType>();
+
+        public DbSet<Provider> Providers => Set<Provider>();
     }
 }

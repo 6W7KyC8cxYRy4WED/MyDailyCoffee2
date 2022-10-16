@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyDailyCoffee2.Model;
 
@@ -11,9 +12,10 @@ using MyDailyCoffee2.Model;
 namespace MyDailyCoffee2.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221014225448_00001")]
+    partial class _00001
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,98 +100,6 @@ namespace MyDailyCoffee2.Migrations
                     b.ToTable("CustomerPhoneNumbers");
                 });
 
-            modelBuilder.Entity("MyDailyCoffee2.Model.Material", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<decimal?>("AlertThreshold")
-                        .HasColumnType("decimal(18,10)");
-
-                    b.Property<string>("Class")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("CurrentStock")
-                        .HasColumnType("decimal(18,10)");
-
-                    b.Property<string>("MaterialBrandName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaterialLineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaterialMeasurementName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaterialTypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SortNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MaterialBrandName");
-
-                    b.HasIndex("MaterialLineName");
-
-                    b.HasIndex("MaterialMeasurementName");
-
-                    b.HasIndex("MaterialTypeName");
-
-                    b.ToTable("Materials");
-                });
-
-            modelBuilder.Entity("MyDailyCoffee2.Model.MaterialBrand", b =>
-                {
-                    b.Property<string>("LowerCaseName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LowerCaseName");
-
-                    b.ToTable("MaterialBrands");
-                });
-
-            modelBuilder.Entity("MyDailyCoffee2.Model.MaterialLine", b =>
-                {
-                    b.Property<string>("LowerCaseName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LowerCaseName");
-
-                    b.ToTable("MaterialLines");
-                });
-
             modelBuilder.Entity("MyDailyCoffee2.Model.MaterialMeasurement", b =>
                 {
                     b.Property<string>("LowerCaseName")
@@ -227,49 +137,6 @@ namespace MyDailyCoffee2.Migrations
                     b.ToTable("MaterialMeasurementTypes");
                 });
 
-            modelBuilder.Entity("MyDailyCoffee2.Model.MaterialType", b =>
-                {
-                    b.Property<string>("LowerCaseName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LowerCaseName");
-
-                    b.ToTable("MaterialTypes");
-                });
-
-            modelBuilder.Entity("MyDailyCoffee2.Model.Provider", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LegalId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LegalName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Providers");
-                });
-
             modelBuilder.Entity("MyDailyCoffee2.Model.Customer", b =>
                 {
                     b.HasOne("MyDailyCoffee2.Model.AzureUser", "CreatedBy")
@@ -296,41 +163,6 @@ namespace MyDailyCoffee2.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("MyDailyCoffee2.Model.Material", b =>
-                {
-                    b.HasOne("MyDailyCoffee2.Model.MaterialBrand", "MaterialBrand")
-                        .WithMany()
-                        .HasForeignKey("MaterialBrandName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyDailyCoffee2.Model.MaterialLine", "MaterialLine")
-                        .WithMany()
-                        .HasForeignKey("MaterialLineName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyDailyCoffee2.Model.MaterialMeasurement", "MaterialMeasurement")
-                        .WithMany()
-                        .HasForeignKey("MaterialMeasurementName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyDailyCoffee2.Model.MaterialType", "MaterialType")
-                        .WithMany()
-                        .HasForeignKey("MaterialTypeName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MaterialBrand");
-
-                    b.Navigation("MaterialLine");
-
-                    b.Navigation("MaterialMeasurement");
-
-                    b.Navigation("MaterialType");
                 });
 
             modelBuilder.Entity("MyDailyCoffee2.Model.MaterialMeasurement", b =>
